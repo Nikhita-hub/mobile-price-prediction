@@ -1,0 +1,120 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.neighbors import KNeighborsRegressor
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+
+df = pd.read_csv('/content/Mobile-Price-Prediction-cleaned_data (2).csv')
+
+
+print("First few rows of the dataset:")
+print(df.head())
+
+print("\nMissing values in each column:")
+print(df.isnull().sum())
+
+print("\nDescriptive statistics of the dataset:")
+print(df.describe())
+
+# PREDICTION USING LINEAR REGRESSION
+print("\nPREDICTION USING LINEAR REGRESSION\n")
+
+X = df[['Battery_Power', 'RAM', 'Ratings', 'Mobile_Size', 'Selfi_Cam', 'Primary_Cam']]
+y = df['Price']
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+
+y_pred = model.predict(X_test)
+
+mae = mean_absolute_error(y_test, y_pred)
+mse = mean_squared_error(y_test, y_pred)
+rmse = np.sqrt(mse)
+r2 = r2_score(y_test, y_pred)
+accuracy_linear = r2 * 100
+print(f'Mean Absolute Error: {mae}')
+print(f'Mean Squared Error: {mse}')
+print(f'Root Mean Squared Error: {rmse}')
+print(f'R^2 Score: {r2}')
+print(f'Linear Regression Accuracy: {accuracy_linear:.2f}%')
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x=y_test, y=y_pred)
+plt.xlabel('Actual Prices')
+plt.ylabel('Predicted Prices')
+plt.title('Actual vs Predicted Prices')
+plt.show()
+
+# Exploratory Data Analysis
+print("\nExploratory Data Analysis\n")
+
+plt.figure(figsize=(10, 6))
+sns.histplot(df['Battery_Power'], kde=True)
+plt.title('Distribution of Battery Power')
+plt.xlabel('Battery Power')
+plt.ylabel('Frequency')
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.boxplot(x='Price', y='Battery_Power', data=df)
+plt.title('Battery Power vs Price Range')
+plt.xlabel('Price Range')
+plt.ylabel('Battery Power')
+plt.show()
+
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='Battery_Power', y='RAM', hue='Price', data=df)
+plt.title('Battery Power vs RAM')
+plt.xlabel('Battery Power')
+plt.ylabel('RAM')
+plt.show()
+
+plt.figure(figsize=(12, 8))
+correlation_matrix = df.corr()
+sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f")
+plt.title('Correlation Matrix')
+plt.show()
+
+# K-NEAREST NEIGHBORS REGRESSION
+print("\nK-NEAREST NEIGHBORS REGRESSION\n")
+
+X_knn = df[['Battery_Power', 'RAM', 'Ratings', 'Mobile_Size', 'Selfi_Cam', 'Primary_Cam']]
+y_knn = df['Price']
+
+X_train_knn, X_test_knn, y_train_knn, y_test_knn = train_test_split(X_knn, y_knn, test_size=0.2, random_state=42)
+
+scaler_knn = StandardScaler()
+X_train_knn = scaler_knn.fit_transform(X_train_knn)
+X_test_knn = scaler_knn.transform(X_test_knn)
+
+knn = KNeighborsRegressor(n_neighbors=5)  # Use KNeighborsRegressor for regression tasks
+knn.fit(X_train_knn, y_train_knn)
+
+y_pred_knn = knn.predict(X_test_knn)
+
+mae_knn = mean_absolute_error(y_test_knn, y_pred_knn)
+mse_knn = mean_squared_error(y_test_knn, y_pred_knn)
+rmse_knn = np.sqrt(mse_knn)
+r2_knn = r2_score(y_test_knn, y_pred_knn)
+accuracy_knn = r2_knn * 100
+print(f'Mean Absolute Error (KNN): {mae_knn}')
+print(f'Mean Squared Error (KNN): {mse_knn}')
+print(f'Root Mean Squared Error (KNN): {rmse_knn}')
+print(f'R^2 Score (KNN): {r2_knn}')
+print(f'KNN Regression Accuracy: {accuracy_knn:.2f}%')
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x=y_test_knn, y=y_pred_knn)
+plt.xlabel('Actual Prices')
+plt.ylabel('Predicted Prices')
+plt.title('Actual vs Predicted Prices (KNN)')
+plt.show()
